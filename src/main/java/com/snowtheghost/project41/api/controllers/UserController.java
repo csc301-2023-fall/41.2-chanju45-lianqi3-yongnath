@@ -77,7 +77,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    // TODO: Refactor such that the User model is not accessed directly
+
     @GetMapping("/{userId}")
     public ResponseEntity<GetUserResponse> getUser(@PathVariable String userId) {
         User user;
@@ -87,7 +87,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(getUserResponse(user));
+        return ResponseEntity.ok(userService.mapUserToResponse(user));
     }
 
     @GetMapping("/me")
@@ -101,22 +101,8 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(getUserResponse(user));
+        return ResponseEntity.ok(userService.mapUserToResponse(user));
     }
 
-    private GetUserResponse getUserResponse(User user) {
-        return new GetUserResponse(user.getUserId(), user.getUsername(), user.getEmail(), userService.getBalance(user),
-                user.getGames().stream().map(gamePlayer -> {
-                    Game game = gamePlayer.getGame();
-                    return new GetGameResponse(
-                            game.getGameId(),
-                            game.getCapacity(),
-                            game.getCost(),
-                            game.getType(),
-                            game.getState(),
-                            game.getPlayerUsernames(),
-                            game.getWinnerUsernamesToEarnings()
-                    );
-                }).collect(Collectors.toList()), user.getCurrentGameId(), user.getType().toString());
-    }
+
 }

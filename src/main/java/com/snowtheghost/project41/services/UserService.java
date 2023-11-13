@@ -1,11 +1,16 @@
 package com.snowtheghost.project41.services;
 
+import com.snowtheghost.project41.api.models.responses.games.GetGameResponse;
+import com.snowtheghost.project41.api.models.responses.users.GetUserResponse;
+import com.snowtheghost.project41.database.models.Game;
 import com.snowtheghost.project41.database.models.User;
 import com.snowtheghost.project41.database.repositories.UserRepository;
 import com.snowtheghost.project41.utils.EncryptionUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -78,5 +83,21 @@ public class UserService {
         }
 
         return null;
+    }
+
+    public GetUserResponse mapUserToResponse(User user){
+        return new GetUserResponse(
+                user.getUserId(), user.getUsername(), user.getEmail(), getBalance(user),
+                user.getGames().stream().map(gamePlayer -> {
+                    Game game = gamePlayer.getGame();
+                    return new GetGameResponse(
+                            game.getGameId(),
+                            game.getPlayerIds(),
+                            game.getType(),
+                            game.getState()
+                    );
+                }).collect(Collectors.toList()),
+                user.getCurrentGameId(), user.getType().toString()
+        );
     }
 }
